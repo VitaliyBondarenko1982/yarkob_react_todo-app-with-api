@@ -1,14 +1,14 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
-import { getTodos, USER_ID } from './api/todos';
-import { filterTodos, TodoList } from './components/TodoList';
+import { USER_ID } from './api/todos';
+import { TodoList } from './components/TodoList';
 import { Footer } from './components/Footer';
 import { FilterType } from './types/FilterType';
 import cs from 'classnames';
-import { TodosContext } from './utils/ContextProvider';
 import { Header } from './components/Header';
+import { useTodosContext } from './components/TodosContext';
 
 export enum Error {
   LoadTodos = 'Unable to load todos',
@@ -19,8 +19,7 @@ export enum Error {
 }
 
 export const App: React.FC = () => {
-  const { todos, setTodos, setIsToggled, setTempTodo, error, setError } =
-    useContext(TodosContext);
+  const { todos, error, loadTodos } = useTodosContext();
   const [filterBy, setFilterBy] = useState<FilterType>(FilterType.All);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -29,48 +28,25 @@ export const App: React.FC = () => {
   };
 
   useEffect(() => {
-    getTodos()
-      .then(data => setTodos(data))
-      .catch(() => {
-        setError(Error.LoadTodos);
-
-        window.setTimeout(() => {
-          setError(null);
-        }, 3000);
-      });
-  }, []);
+    loadTodos();
+  }, [loadTodos]);
 
   if (!USER_ID) {
     return <UserWarning />;
   }
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    if (filterTodos(FilterType.Completed, todos).length === todos.length) {
-      setIsToggled(true);
-    } else {
-      setIsToggled(false);
-    }
-  }, [todos]);
 
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        {/* Add header to another component */}
-        <Header
-          setTempTodo={setTempTodo}
-          inputRef={inputRef}
-          onFocusHeaderInput={onFocusHeaderInput}
-        />
+        <Header inputRef={inputRef} onFocusHeaderInput={onFocusHeaderInput} />
 
         <TodoList
           filterBy={filterBy}
           onFocusHandlerInput={onFocusHeaderInput}
         />
 
-        {/* Hide the footer if there are no todos */}
         {!!todos.length && (
           <Footer
             setFilterBy={setFilterBy}
@@ -79,10 +55,6 @@ export const App: React.FC = () => {
           />
         )}
       </div>
-
-      {/* DON'T use conditional rendering to hide the notification */}
-      {/* Add the 'hidden' class to hide the message smoothly */}
-      {/* Add errors to another components */}
       <div
         data-cy="ErrorNotification"
         className={cs(
@@ -93,7 +65,6 @@ export const App: React.FC = () => {
         )}
       >
         <button data-cy="HideErrorButton" type="button" className="delete" />
-        {/* show only one message at a time */}
         <div>
           {error}
           <br />
