@@ -1,10 +1,10 @@
 import { TodoItem } from './Todo';
 import { Todo } from '../types/Todo';
 import { FilterType } from '../types/FilterType';
-import React, { useContext } from 'react';
+import React from 'react';
 import { filterTodos } from '../utils/filterTodos';
 import { TempTodo } from './TempTodo';
-import { TodosContext } from '../utils/ContextProvider';
+import { useTodosContext } from './TodosContext';
 export { filterTodos } from '../utils/filterTodos';
 
 interface Props {
@@ -16,7 +16,7 @@ export const TodoList: React.FC<Props> = ({
   filterBy,
   onFocusHandlerInput,
 }) => {
-  const { todos, tempTodo } = useContext(TodosContext);
+  const { todos, tempTodo } = useTodosContext();
 
   return (
     <section className="todoapp__main" data-cy="TodoList">

@@ -5,16 +5,15 @@ import React, {
   FormEvent,
   MutableRefObject,
   SetStateAction,
-  useContext,
   useState,
 } from 'react';
-import { TodosContext } from '../utils/ContextProvider';
 import { updateTodo, USER_ID } from '../api/todos';
 import { client } from '../utils/fetchClient';
 import { Error } from '../App';
 import { filterTodos } from '../utils/filterTodos';
 import { FilterType } from '../types/FilterType';
 import { Todo } from '../types/Todo';
+import { useTodosContext } from './TodosContext';
 
 interface Props {
   setTempTodo: Dispatch<SetStateAction<Todo | null>>;
@@ -36,7 +35,7 @@ export const Header: React.FC<Props> = ({
     setIsToggled,
     setProcessingTodos,
     tempTodo,
-  } = useContext(TodosContext);
+  } = useTodosContext();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);

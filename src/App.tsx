@@ -1,14 +1,14 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import { getTodos, USER_ID } from './api/todos';
 import { filterTodos, TodoList } from './components/TodoList';
 import { Footer } from './components/Footer';
 import { FilterType } from './types/FilterType';
 import cs from 'classnames';
-import { TodosContext } from './utils/ContextProvider';
 import { Header } from './components/Header';
+import { useTodosContext } from './components/TodosContext';
 
 export enum Error {
   LoadTodos = 'Unable to load todos',
@@ -20,7 +20,7 @@ export enum Error {
 
 export const App: React.FC = () => {
   const { todos, setTodos, setIsToggled, setTempTodo, error, setError } =
-    useContext(TodosContext);
+    useTodosContext();
   const [filterBy, setFilterBy] = useState<FilterType>(FilterType.All);
   const inputRef = useRef<HTMLInputElement | null>(null);
 

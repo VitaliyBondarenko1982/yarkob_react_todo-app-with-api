@@ -5,10 +5,10 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { Todo } from '../types/Todo';
-import { Error } from '../App';
+import { Todo } from '../../types/Todo';
+import { Error } from '../../App';
 
-export const TodosContext = React.createContext<{
+export interface ITodosContext {
   todos: Todo[];
   setTodos: Dispatch<SetStateAction<Todo[]>>;
   isToggled: boolean;
@@ -19,7 +19,9 @@ export const TodosContext = React.createContext<{
   setProcessingTodos: Dispatch<SetStateAction<Todo['id'][]>>;
   tempTodo: Todo | null;
   setTempTodo: Dispatch<SetStateAction<Todo | null>>;
-}>({
+}
+
+export const TodosContext = React.createContext<ITodosContext>({
   todos: [],
   setTodos: () => {},
   isToggled: false,

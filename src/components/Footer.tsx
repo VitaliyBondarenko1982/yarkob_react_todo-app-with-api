@@ -1,10 +1,10 @@
-import React, { Dispatch, SetStateAction, useContext } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { FilterType } from '../types/FilterType';
 import cs from 'classnames';
 import { filterTodos } from '../utils/filterTodos';
 import { client } from '../utils/fetchClient';
 import { Error } from '../App';
-import { TodosContext } from '../utils/ContextProvider';
+import { useTodosContext } from './TodosContext';
 
 interface Props {
   setFilterBy: Dispatch<SetStateAction<FilterType>>;
@@ -17,8 +17,7 @@ export const Footer: React.FC<Props> = ({
   filterBy,
   onFocusHeaderInput,
 }) => {
-  const { todos, setTodos, setError, setProcessingTodos } =
-    useContext(TodosContext);
+  const { todos, setTodos, setError, setProcessingTodos } = useTodosContext();
 
   const clearCompletedHandler = () => {
     filterTodos(FilterType.Completed, todos).forEach(todo => {

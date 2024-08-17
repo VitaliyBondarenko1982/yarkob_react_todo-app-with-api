@@ -1,16 +1,10 @@
-import React, {
-  ChangeEvent,
-  FormEvent,
-  KeyboardEvent,
-  useState,
-  useContext,
-} from 'react';
+import React, { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react';
 import cs from 'classnames';
 import { Todo } from '../types/Todo';
 import { client } from '../utils/fetchClient';
 import { Error } from '../App';
 import { updateTodo } from '../api/todos';
-import { TodosContext } from '../utils/ContextProvider';
+import { useTodosContext } from './TodosContext';
 
 interface Props {
   title: string;
@@ -24,7 +18,7 @@ export const TodoItem: React.FC<Props> = ({
   onFocusHandlerInput,
 }) => {
   const { setTodos, setError, setProcessingTodos, processingTodos, isToggled } =
-    useContext(TodosContext);
+    useTodosContext();
   const [isEditing, setIsEditing] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState(todo.title);
 
