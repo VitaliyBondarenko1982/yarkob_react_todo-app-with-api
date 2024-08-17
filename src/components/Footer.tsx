@@ -1,9 +1,7 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { FilterType } from '../types/FilterType';
 import cs from 'classnames';
-import { filterTodos } from '../utils/filterTodos';
-import { client } from '../utils/fetchClient';
-import { Error } from '../App';
+import { getActiveTodos, getCompletedTodos } from '../utils/filterTodos';
 import { useTodosContext } from './TodosContext';
 
 interface Props {
@@ -17,41 +15,23 @@ export const Footer: React.FC<Props> = ({
   filterBy,
   onFocusHeaderInput,
 }) => {
-  const { todos, setTodos, setError, setProcessingTodos } = useTodosContext();
+  const { todos, onDeleteTodo } = useTodosContext();
+
+  const activeTodos = getActiveTodos(todos);
+  const completedTodos = getCompletedTodos(todos);
 
   const clearCompletedHandler = () => {
-    filterTodos(FilterType.Completed, todos).forEach(todo => {
-      setProcessingTodos(prevProcessingTodos => [
-        ...prevProcessingTodos,
-        todo.id,
-      ]);
-
-      client
-        .delete(`/todos/${todo?.id}`)
-        .then(() => {
-          setTodos(prevTodos => prevTodos.filter(t => t.id !== todo.id));
-        })
-        .catch(() => {
-          setError(Error.DeleteTodo);
-
-          window.setTimeout(() => {
-            setError(null);
-          }, 3000);
-        })
-        .finally(() => {
-          setProcessingTodos(prev => prev.filter(prevId => prevId !== todo.id));
-          onFocusHeaderInput();
-        });
+    completedTodos.forEach(todo => {
+      onDeleteTodo(todo.id, onFocusHeaderInput);
     });
   };
 
   return (
     <footer className="todoapp__footer" data-cy="Footer">
       <span className="todo-count" data-cy="TodosCounter">
-        {`${filterTodos(FilterType.Active, todos).length} items left`}
+        {`${activeTodos.length} items left`}
       </span>
 
-      {/* Active link should have the 'selected' class */}
       <nav className="filter" data-cy="Filter">
         <a
           href="#/"
@@ -87,12 +67,11 @@ export const Footer: React.FC<Props> = ({
         </a>
       </nav>
 
-      {/* this button should be disabled if there are no completed todos */}
       <button
         type="button"
         className="todoapp__clear-completed"
         data-cy="ClearCompletedButton"
-        disabled={!filterTodos(FilterType.Completed, todos).length}
+        disabled={!completedTodos.length}
         onClick={clearCompletedHandler}
       >
         Clear completed

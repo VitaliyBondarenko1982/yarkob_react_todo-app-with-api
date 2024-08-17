@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
-import { getTodos, USER_ID } from './api/todos';
+import { USER_ID } from './api/todos';
 import { TodoList } from './components/TodoList';
 import { Footer } from './components/Footer';
 import { FilterType } from './types/FilterType';
@@ -19,7 +19,7 @@ export enum Error {
 }
 
 export const App: React.FC = () => {
-  const { todos, setTodos, setTempTodo, error, setError } = useTodosContext();
+  const { todos, error, loadTodos } = useTodosContext();
   const [filterBy, setFilterBy] = useState<FilterType>(FilterType.All);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -28,16 +28,8 @@ export const App: React.FC = () => {
   };
 
   useEffect(() => {
-    getTodos()
-      .then(data => setTodos(data))
-      .catch(() => {
-        setError(Error.LoadTodos);
-
-        window.setTimeout(() => {
-          setError(null);
-        }, 3000);
-      });
-  }, []);
+    loadTodos();
+  }, [loadTodos]);
 
   if (!USER_ID) {
     return <UserWarning />;
@@ -48,18 +40,13 @@ export const App: React.FC = () => {
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <Header
-          setTempTodo={setTempTodo}
-          inputRef={inputRef}
-          onFocusHeaderInput={onFocusHeaderInput}
-        />
+        <Header inputRef={inputRef} onFocusHeaderInput={onFocusHeaderInput} />
 
         <TodoList
           filterBy={filterBy}
           onFocusHandlerInput={onFocusHeaderInput}
         />
 
-        {/* Hide the footer if there are no todos */}
         {!!todos.length && (
           <Footer
             setFilterBy={setFilterBy}
@@ -68,10 +55,6 @@ export const App: React.FC = () => {
           />
         )}
       </div>
-
-      {/* DON'T use conditional rendering to hide the notification */}
-      {/* Add the 'hidden' class to hide the message smoothly */}
-      {/* Add errors to another components */}
       <div
         data-cy="ErrorNotification"
         className={cs(
@@ -82,7 +65,6 @@ export const App: React.FC = () => {
         )}
       >
         <button data-cy="HideErrorButton" type="button" className="delete" />
-        {/* show only one message at a time */}
         <div>
           {error}
           <br />

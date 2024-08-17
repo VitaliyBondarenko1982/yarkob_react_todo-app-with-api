@@ -27,7 +27,7 @@ export const TodoList: React.FC<Props> = ({
           onFocusHandlerInput={onFocusHandlerInput}
         />
       ))}
-      {!!tempTodo && <TempTodo title={tempTodo.title} />}
+      {tempTodo && <TempTodo title={tempTodo.title} />}
     </section>
   );
 };

@@ -1,9 +1,6 @@
 import React, { ChangeEvent, FormEvent, KeyboardEvent, useState } from 'react';
 import cs from 'classnames';
 import { Todo } from '../types/Todo';
-import { client } from '../utils/fetchClient';
-import { Error } from '../App';
-import { updateTodo } from '../api/todos';
 import { useTodosContext } from './TodosContext';
 
 interface Props {
@@ -14,58 +11,18 @@ interface Props {
 export const TodoItem: React.FC<Props> = ({ todo, onFocusHandlerInput }) => {
   const { completed, title, id } = todo;
 
-  const { setTodos, setError, setProcessingTodos, processingTodos } =
-    useTodosContext();
+  const { processingTodos, onDeleteTodo, onUpdateTodo } = useTodosContext();
   const [isEditing, setIsEditing] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState(title);
 
-  const deleteTodo = (todoId: number) => {
-    setProcessingTodos(prevProcessingTodos => [...prevProcessingTodos, id]);
-
-    client
-      .delete(`/todos/${todoId}`)
-      .then(() => {
-        setTodos(prevTodos =>
-          prevTodos.filter(checkTodo => checkTodo.id !== todoId),
-        );
-        setIsEditing(false);
-        onFocusHandlerInput();
-      })
-      .catch(() => {
-        setError(Error.DeleteTodo);
-
-        window.setTimeout(() => {
-          setError(null);
-        }, 3000);
-      })
-      .finally(() =>
-        setProcessingTodos(prev => prev.filter(prevId => prevId !== id)),
-      );
+  const successCallback = () => {
+    setIsEditing(false);
+    onFocusHandlerInput();
   };
 
-  const handleUpdateTodo = (todoForUpdate: Todo) => {
-    setProcessingTodos([...processingTodos, todoForUpdate.id]);
-
-    return updateTodo(todoForUpdate)
-      .then(updatedTodo => {
-        setTodos(prevTodos =>
-          prevTodos.map(t => (t.id === todoForUpdate.id ? updatedTodo : t)),
-        );
-
-        setIsEditing(false);
-        onFocusHandlerInput();
-      })
-      .catch(() => {
-        setError(Error.UpdateTodo);
-
-        window.setTimeout(() => {
-          setError(null);
-        }, 3000);
-      })
-      .finally(() =>
-        setProcessingTodos(prev => prev.filter(procId => procId !== id)),
-      );
-  };
+  const handleDeleteTodo = () => onDeleteTodo(id, successCallback);
+  const toggleTodo = () =>
+    onUpdateTodo({ ...todo, completed: !completed }, successCallback);
 
   const updateTitle = () => {
     const trimmedTitle = updatedTitle.trim();
@@ -77,12 +34,12 @@ export const TodoItem: React.FC<Props> = ({ todo, onFocusHandlerInput }) => {
     }
 
     if (!trimmedTitle) {
-      deleteTodo(id);
+      handleDeleteTodo();
 
       return;
     }
 
-    handleUpdateTodo({ ...todo, title: trimmedTitle });
+    onUpdateTodo({ ...todo, title: trimmedTitle }, successCallback);
   };
 
   const doubleClickHandler = () => {
@@ -119,15 +76,14 @@ export const TodoItem: React.FC<Props> = ({ todo, onFocusHandlerInput }) => {
       })}
       onDoubleClick={doubleClickHandler}
     >
+      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
       <label className="todo__status-label">
-        {/* This comment is made because it fixes
-          "A form label must be associated with a control" error */}
         <input
           data-cy="TodoStatus"
           type="checkbox"
           className="todo__status"
           checked={completed}
-          onChange={() => handleUpdateTodo({ ...todo, completed: !completed })}
+          onChange={toggleTodo}
         />
       </label>
 
@@ -150,19 +106,17 @@ export const TodoItem: React.FC<Props> = ({ todo, onFocusHandlerInput }) => {
             {title}
           </span>
 
-          {/* Remove button appears only on hover */}
           <button
             type="button"
             className="todo__remove"
             data-cy="TodoDelete"
-            onClick={() => deleteTodo(id)}
+            onClick={handleDeleteTodo}
           >
             ×
           </button>
         </>
       )}
 
-      {/* overlay will cover the todo while it is being deleted or updated */}
       <div
         data-cy="TodoLoader"
         className={cs('modal overlay', {
