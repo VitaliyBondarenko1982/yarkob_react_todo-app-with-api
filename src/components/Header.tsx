@@ -10,7 +10,7 @@ import React, {
 import { updateTodo, USER_ID } from '../api/todos';
 import { client } from '../utils/fetchClient';
 import { Error } from '../App';
-import { filterTodos } from '../utils/filterTodos';
+import { filterTodos, getCompletedTodos } from '../utils/filterTodos';
 import { FilterType } from '../types/FilterType';
 import { Todo } from '../types/Todo';
 import { useTodosContext } from './TodosContext';
@@ -27,23 +27,15 @@ export const Header: React.FC<Props> = ({
   inputRef,
 }) => {
   const [query, setQuery] = useState('');
-  const {
-    todos,
-    isToggled,
-    setError,
-    setTodos,
-    setIsToggled,
-    setProcessingTodos,
-    tempTodo,
-  } = useTodosContext();
+  const { todos, setError, setTodos, setProcessingTodos, tempTodo } =
+    useTodosContext();
+  const completedTodos = getCompletedTodos(todos);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
   };
 
   const toggleAllHandler = () => {
-    setIsToggled(!isToggled);
-
     const activeTodos = filterTodos(FilterType.Active, todos);
     const todosForUpdate = activeTodos.length ? activeTodos : todos;
 
@@ -124,7 +116,7 @@ export const Header: React.FC<Props> = ({
         <button
           type="button"
           className={cs('todoapp__toggle-all', {
-            active: isToggled,
+            active: completedTodos.length === todos.length,
           })}
           data-cy="ToggleAllButton"
           onClick={toggleAllHandler}

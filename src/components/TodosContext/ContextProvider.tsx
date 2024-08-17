@@ -11,8 +11,6 @@ import { Error } from '../../App';
 export interface ITodosContext {
   todos: Todo[];
   setTodos: Dispatch<SetStateAction<Todo[]>>;
-  isToggled: boolean;
-  setIsToggled: Dispatch<SetStateAction<boolean>>;
   error: Error | null;
   setError: Dispatch<SetStateAction<Error | null>>;
   processingTodos: Todo['id'][];
@@ -24,8 +22,6 @@ export interface ITodosContext {
 export const TodosContext = React.createContext<ITodosContext>({
   todos: [],
   setTodos: () => {},
-  isToggled: false,
-  setIsToggled: () => {},
   error: null,
   setError: () => {},
   processingTodos: [],
@@ -40,7 +36,6 @@ interface Props {
 
 export const ContextProvider: React.FC<Props> = ({ children }) => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [isToggled, setIsToggled] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [processingTodos, setProcessingTodos] = useState<Todo['id'][]>([]);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
@@ -49,8 +44,6 @@ export const ContextProvider: React.FC<Props> = ({ children }) => {
     () => ({
       todos,
       setTodos,
-      isToggled,
-      setIsToggled,
       error,
       setError,
       processingTodos,
@@ -58,7 +51,7 @@ export const ContextProvider: React.FC<Props> = ({ children }) => {
       tempTodo,
       setTempTodo,
     }),
-    [todos, isToggled, error, processingTodos, tempTodo],
+    [todos, error, processingTodos, tempTodo],
   );
 
   return (

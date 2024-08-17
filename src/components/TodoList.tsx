@@ -23,7 +23,6 @@ export const TodoList: React.FC<Props> = ({
       {filterTodos(filterBy, todos).map((todo: Todo) => (
         <TodoItem
           key={todo.id}
-          title={todo.title}
           todo={todo}
           onFocusHandlerInput={onFocusHandlerInput}
         />

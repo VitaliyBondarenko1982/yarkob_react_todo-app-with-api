@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import { getTodos, USER_ID } from './api/todos';
-import { filterTodos, TodoList } from './components/TodoList';
+import { TodoList } from './components/TodoList';
 import { Footer } from './components/Footer';
 import { FilterType } from './types/FilterType';
 import cs from 'classnames';
@@ -19,8 +19,7 @@ export enum Error {
 }
 
 export const App: React.FC = () => {
-  const { todos, setTodos, setIsToggled, setTempTodo, error, setError } =
-    useTodosContext();
+  const { todos, setTodos, setTempTodo, error, setError } = useTodosContext();
   const [filterBy, setFilterBy] = useState<FilterType>(FilterType.All);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -44,21 +43,11 @@ export const App: React.FC = () => {
     return <UserWarning />;
   }
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    if (filterTodos(FilterType.Completed, todos).length === todos.length) {
-      setIsToggled(true);
-    } else {
-      setIsToggled(false);
-    }
-  }, [todos]);
-
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        {/* Add header to another component */}
         <Header
           setTempTodo={setTempTodo}
           inputRef={inputRef}

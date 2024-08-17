@@ -7,32 +7,26 @@ import { updateTodo } from '../api/todos';
 import { useTodosContext } from './TodosContext';
 
 interface Props {
-  title: string;
   todo: Todo;
   onFocusHandlerInput: VoidFunction;
 }
 
-export const TodoItem: React.FC<Props> = ({
-  title,
-  todo,
-  onFocusHandlerInput,
-}) => {
-  const { setTodos, setError, setProcessingTodos, processingTodos, isToggled } =
+export const TodoItem: React.FC<Props> = ({ todo, onFocusHandlerInput }) => {
+  const { completed, title, id } = todo;
+
+  const { setTodos, setError, setProcessingTodos, processingTodos } =
     useTodosContext();
   const [isEditing, setIsEditing] = useState(false);
-  const [updatedTitle, setUpdatedTitle] = useState(todo.title);
+  const [updatedTitle, setUpdatedTitle] = useState(title);
 
-  const deleteTodo = (todoToDelete: Todo) => {
-    setProcessingTodos(prevProcessingTodos => [
-      ...prevProcessingTodos,
-      todo.id,
-    ]);
+  const deleteTodo = (todoId: number) => {
+    setProcessingTodos(prevProcessingTodos => [...prevProcessingTodos, id]);
 
     client
-      .delete(`/todos/${todoToDelete?.id}`)
+      .delete(`/todos/${todoId}`)
       .then(() => {
         setTodos(prevTodos =>
-          prevTodos.filter(checkTodo => checkTodo.id !== todoToDelete?.id),
+          prevTodos.filter(checkTodo => checkTodo.id !== todoId),
         );
         setIsEditing(false);
         onFocusHandlerInput();
@@ -45,7 +39,7 @@ export const TodoItem: React.FC<Props> = ({
         }, 3000);
       })
       .finally(() =>
-        setProcessingTodos(prev => prev.filter(prevId => prevId !== todo.id)),
+        setProcessingTodos(prev => prev.filter(prevId => prevId !== id)),
       );
   };
 
@@ -69,21 +63,21 @@ export const TodoItem: React.FC<Props> = ({
         }, 3000);
       })
       .finally(() =>
-        setProcessingTodos(prev => prev.filter(id => id !== todo.id)),
+        setProcessingTodos(prev => prev.filter(procId => procId !== id)),
       );
   };
 
   const updateTitle = () => {
     const trimmedTitle = updatedTitle.trim();
 
-    if (trimmedTitle === todo.title) {
+    if (trimmedTitle === title) {
       setIsEditing(false);
 
       return;
     }
 
     if (!trimmedTitle) {
-      deleteTodo(todo);
+      deleteTodo(id);
 
       return;
     }
@@ -121,7 +115,7 @@ export const TodoItem: React.FC<Props> = ({
     <div
       data-cy="Todo"
       className={cs('todo', {
-        completed: isToggled ? isToggled : todo.completed,
+        completed,
       })}
       onDoubleClick={doubleClickHandler}
     >
@@ -132,10 +126,8 @@ export const TodoItem: React.FC<Props> = ({
           data-cy="TodoStatus"
           type="checkbox"
           className="todo__status"
-          checked={todo.completed}
-          onChange={() =>
-            handleUpdateTodo({ ...todo, completed: !todo.completed })
-          }
+          checked={completed}
+          onChange={() => handleUpdateTodo({ ...todo, completed: !completed })}
         />
       </label>
 
@@ -163,7 +155,7 @@ export const TodoItem: React.FC<Props> = ({
             type="button"
             className="todo__remove"
             data-cy="TodoDelete"
-            onClick={() => deleteTodo(todo)}
+            onClick={() => deleteTodo(id)}
           >
             ×
           </button>
@@ -174,7 +166,7 @@ export const TodoItem: React.FC<Props> = ({
       <div
         data-cy="TodoLoader"
         className={cs('modal overlay', {
-          'is-active': processingTodos.includes(todo.id),
+          'is-active': processingTodos.includes(id),
         })}
       >
         <div className="modal-background has-background-white-ter" />
